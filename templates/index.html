@@ -1,26 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-    <title>Todo List</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Todoリスト</title>
 </head>
 <body>
-    <h1>Todo List</h1>
-    <form action="/todos/add" method="post">
-        <input type="text" name="content" placeholder="Todo内容" required>
-        <input type="datetime-local" name="deadline" required>
-        <button type="submit">追加</button>
-    </form>
-    <ul>
+    <h1>Todoリスト</h1>
+    <table border="1">
+        <tr>
+            <th>ID</th>
+            <th>タイトル</th>
+            <th>内容</th>
+            <th>期限</th>
+            <th>完了</th>
+        </tr>
         {% for todo in todos %}
-        <li>
-            {{ todo.id }} - {{ todo.content }} - {{ todo.deadline }} - 
-            {% if todo.done %}完了{% else %}未完了{% endif %}
-            <a href="/todos/{{ todo.id }}">詳細</a>
-            <form action="/todos/delete/{{ todo.id }}" method="post" style="display:inline;">
-                <button type="submit">削除</button>
-            </form>
-        </li>
+        <tr>
+            <td>{{ todo.id }}</td>
+            <td>{{ todo.title }}</td>
+            <td>{{ todo.content }}</td>
+            <td>{{ todo.deadline.strftime('%Y/%m/%d %H:%M') }}</td>
+            <td>{{ todo.done }}</td>
+        </tr>
         {% endfor %}
-    </ul>
+    </table>
 </body>
 </html>
+
