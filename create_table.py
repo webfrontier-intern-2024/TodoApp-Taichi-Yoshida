@@ -1,8 +1,10 @@
 import os
+from datetime import datetime  # datetimeのインポートを追加
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
-from models import *
+from models import Todo  # 必要なモデルをインポート
+
 # .env.localファイルから環境変数を読み込む
 load_dotenv(".env.local")
 
@@ -22,8 +24,8 @@ def insert_test_data():
     db = SessionLocal()
     try:
         # テストデータの作成
-        todo1 = Todo(content="買い物", deadline=datetime(2024, 10, 20, 12, 0))
-        todo2 = Todo(content="勉強", deadline=datetime(2024, 10, 21, 18, 0))
+        todo1 = Todo(title="買い物", content="牛乳を買う", deadline=datetime(2024, 10, 20, 12, 0))
+        todo2 = Todo(title="勉強", content="Pythonを勉強する", deadline=datetime(2024, 10, 21, 18, 0))
 
         # データベースに追加
         db.add(todo1)
@@ -37,6 +39,7 @@ def insert_test_data():
     
     except Exception as e:
         print(f"エラーが発生しました: {e}")
+        db.rollback()  # エラーが発生した場合、ロールバックする
     finally:
         db.close()
 
