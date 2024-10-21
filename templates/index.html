@@ -1,30 +1,28 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todoリスト</title>
+    <title>Todo List</title>
+    <link rel="stylesheet" href="../static/styles.css">
 </head>
 <body>
-    <h1>Todoリスト</h1>
-    <table border="1">
-        <tr>
-            <th>ID</th>
-            <th>タイトル</th>
-            <th>内容</th>
-            <th>期限</th>
-            <th>完了</th>
-        </tr>
-        {% for todo in todos %}
-        <tr>
-            <td>{{ todo.id }}</td>
-            <td>{{ todo.title }}</td>
-            <td>{{ todo.content }}</td>
-            <td>{{ todo.deadline.strftime('%Y/%m/%d %H:%M') }}</td>
-            <td>{{ todo.done }}</td>
-        </tr>
-        {% endfor %}
-    </table>
+    <h1>Todo List</h1>
+
+    <a href="/add-todo"><button>Add New Todo</button></a>
+
+    {% if todos %}
+        <ul>
+            {% for todo in todos %}
+                <li>
+                    <strong>{{ todo.title }}</strong>: {{ todo.content }} <br>
+                    Deadline: {{ todo.deadline.strftime('%Y-%m-%d %H:%M') }} <br>
+                    Completed: {{ 'Yes' if todo.done else 'No' }}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No todos found.</p>
+    {% endif %}
 </body>
 </html>
-

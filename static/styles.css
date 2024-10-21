@@ -1,11 +1,97 @@
-body {
-    font-family: Arial, sans-serif;
+/* Reset some default styles */
+body, h1, ul, li, a, button, p {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
 }
 
-button {
-    background-color: #4CAF50;
-    color: white;
+/* Set a pleasant background color and font */
+body {
+    background-color: #f9f9f9;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+/* Style the main title */
+h1 {
+    color: #333;
+    margin-bottom: 20px;
+}
+
+/* Center the button and style it */
+a button {
     padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
     border: none;
+    border-radius: 4px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 20px;
+}
+
+a button:hover {
+    background-color: #0056b3;
+}
+
+/* Style the todo list */
+ul {
+    list-style: none;
+    width: 100%;
+    max-width: 600px;
+    padding: 0;
+}
+
+/* Add styles to individual todo items */
+li {
+    background-color: #fff;
+    border-left: 5px solid #007bff; /* Add a colored border for emphasis */
+    padding: 15px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: background-color 0.3s ease;
+}
+
+li:hover {
+    background-color: #f0f8ff; /* Light blue background on hover */
+}
+
+/* Emphasize the title */
+li strong {
+    font-size: 18px;
+    color: #333;
+}
+
+/* Style the rest of the text */
+li {
+    color: #555;
+}
+
+/* Style paragraphs for no todos */
+p {
+    color: #666;
+    font-size: 16px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 450px) {
+    ul {
+        padding: 10px;
+    }
+
+    li {
+        padding: 10px;
+    }
+
+    a button {
+        width: 100%;
+    }
 }
