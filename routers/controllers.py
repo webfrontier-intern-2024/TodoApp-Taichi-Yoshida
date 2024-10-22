@@ -3,15 +3,13 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from setting import SessionLocal
-from models import Todo
+from models import Todo, Tag, Setting
 from datetime import datetime
 
-# ルーターを作成
 router = APIRouter()
-
 templates = Jinja2Templates(directory="templates")
 
-# Dependency to get the database session
+# データベースセッションを取得する関数
 def get_db():
     db = SessionLocal()
     try:
@@ -19,34 +17,85 @@ def get_db():
     finally:
         db.close()
 
+# Todo関連のルート
 @router.get("/", response_class=HTMLResponse)
 async def read_todos(request: Request, db: Session = Depends(get_db)):
-    todos = db.query(Todo).all()
-    context = {
-        "request": request,
-        "todos": todos 
-    }
-    return templates.TemplateResponse("index.html", context)
+    settings = db.query(Setting).all()
+    todos_with_tags = [
+        {"todo": db.query(Todo).filter(Todo.id == s.todo_id).first(),
+         "tag": db.query(Tag).filter(Tag.id == s.tag_id).first()}
+        for s in settings
+    ]
+    return templates.TemplateResponse("index.html", {"request": request, "todos_with_tags": todos_with_tags})
 
 @router.get("/add-todo", response_class=HTMLResponse)
-async def add_todo_form(request: Request):
-    return templates.TemplateResponse("add_todo.html", {"request": request})
-
+async def add_todo_form(request: Request, db: Session = Depends(get_db)):
+    tags = db.query(Tag).all()
+    return templates.TemplateResponse("add_todo.html", {"request": request, "tags": tags})
 @router.post("/add-todo", response_class=HTMLResponse)
 async def create_todo(
     request: Request,
     title: str = Form(...),
     content: str = Form(...),
     deadline: str = Form(...),
+    tags: list[int] = Form(None),  # List of tag IDs (optional)
     db: Session = Depends(get_db)
 ):
-    # Parse deadline into datetime object
-    deadline_dt = datetime.strptime(deadline, "%Y-%m-%dT%H:%M")
+    try:
+        deadline_dt = datetime.strptime(deadline, "%Y-%m-%dT%H:%M")
+        new_todo = Todo(title=title, content=content, deadline=deadline_dt)
+        db.add(new_todo)
+        db.flush()
 
-    # Create and add new Todo to the database
-    new_todo = Todo(title=title, content=content, deadline=deadline_dt)
-    db.add(new_todo)
-    db.commit()
+        if not tags:
+            db.add(Setting(todo_id=new_todo.id, tag_id=None))
+        else:
+            for tag_id in tags:
+                db.add(Setting(todo_id=new_todo.id, tag_id=tag_id))
 
-    # Redirect back to the main Todo list
+        db.commit()
+        return RedirectResponse(url="/?message=Todo successfully added", status_code=303)
+
+    except Exception as e:
+        print(f"Error: {e}")  # ログにエラーメッセージを表示
+        return RedirectResponse(url="/?message=Error occurred while adding Todo", status_code=303)
+
+@router.post("/delete-todo/{todo_id}")
+async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if todo:
+        db.query(Setting).filter(Setting.todo_id == todo.id).delete()
+        db.delete(todo)
+        db.commit()
     return RedirectResponse(url="/", status_code=303)
+
+@router.post("/toggle-done/{todo_id}")
+async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if todo:
+        # 型キャストでbool値を取得して反転
+        todo.done = not bool(todo.done)
+
+        db.commit()
+    return RedirectResponse(url="/", status_code=303)
+
+# Tag関連のルート
+@router.get("/add-tag", response_class=HTMLResponse)
+async def add_tag_form(request: Request, db: Session = Depends(get_db)):
+    tags = db.query(Tag).all()
+    return templates.TemplateResponse("add_tag.html", {"request": request, "tags": tags})
+
+@router.post("/add-tag", response_class=HTMLResponse)
+async def create_tag(request: Request, description: str = Form(...), db: Session = Depends(get_db)):
+    new_tag = Tag(description=description)
+    db.add(new_tag)
+    db.commit()
+    return RedirectResponse(url="/add-tag", status_code=303)
+
+@router.post("/delete-tag/{tag_id}")
+async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
+    tag_to_delete = db.query(Tag).filter(Tag.id == tag_id).first()
+    if tag_to_delete:
+        db.delete(tag_to_delete)
+        db.commit()
+    return RedirectResponse(url="/add-tag", status_code=303)
