@@ -17,17 +17,19 @@ def get_db():
     finally:
         db.close()
 
-# Todo表示ペーぞのルート
 @router.get("/", response_class=HTMLResponse)
 async def read_todos(request: Request, db: Session = Depends(get_db)):
     # Todoごとに関連する全てのSettingエントリを取得
     todos = db.query(Todo).all()
 
-    # SettingテーブルからTodoに関連するtag_idをリスト化して取得
+    # SettingテーブルからTodoに関連するtag_idを使い、Tagテーブルからdescriptionを取得してリスト化
     todos_with_tags = [
         {
             "todo": todo,
-            "tags": [setting.tag_id for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()]
+            "tags": [
+                db.query(Tag.description).filter(Tag.id == setting.tag_id).scalar() 
+                for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()
+            ]
         }
         for todo in todos
     ]
