@@ -113,7 +113,7 @@ ul {
     color: #fff; /* White text color */
     padding: 5px 10px; /* Padding around the tag */
     border-radius: 12px; /* Rounded edges for the tag */
-    margin-right: 10px; /* Space between tag and completion status */
+    margin: 10px; /* Space between tag and completion status */
     font-size: 14px; /* Slightly smaller font for tags */
 }
 

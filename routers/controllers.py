@@ -17,8 +17,9 @@ def get_db():
     finally:
         db.close()
 
+# Todo一覧のページ
 @router.get("/", response_class=HTMLResponse)
-async def read_todos(request: Request, db: Session = Depends(get_db)):
+async def read_todos_html(request: Request, db: Session = Depends(get_db)):
     # Todoごとに関連する全てのSettingエントリを取得
     todos = db.query(Todo).all()
 
@@ -27,7 +28,7 @@ async def read_todos(request: Request, db: Session = Depends(get_db)):
         {
             "todo": todo,
             "tags": [
-                db.query(Tag.description).filter(Tag.id == setting.tag_id).scalar() 
+                tag.description if (tag := db.query(Tag).filter(Tag.id == setting.tag_id).first()) is not None else ""
                 for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()
             ]
         }
@@ -47,33 +48,27 @@ async def add_tag_form(request: Request, db: Session = Depends(get_db)):
     tags = db.query(Tag).all()
     return templates.TemplateResponse("add_tag.html", {"request": request, "tags": tags})
 
+######################
+##      操作        ##
+######################
+
 @router.post("/add-todo", response_class=HTMLResponse)
 async def create_todo(
-    request: Request,
     title: str = Form(...),
     content: str = Form(...),
     deadline: str = Form(...),
-    tags: list[int] = Form(None),  # List of tag IDs (optional)
+    tags: list[int] = Form(default=[]),
     db: Session = Depends(get_db)
 ):
-    try:
-        deadline_dt = datetime.strptime(deadline, "%Y-%m-%dT%H:%M")
-        new_todo = Todo(title=title, content=content, deadline=deadline_dt)
-        db.add(new_todo)
-        db.flush()
+    deadline_dt = datetime.strptime(deadline, "%Y-%m-%dT%H:%M")
+    new_todo = Todo(title=title, content=content, deadline=deadline_dt)
+    db.add(new_todo)
+    db.flush()
+    for tag_id in tags:
+        db.add(Setting(todo_id=new_todo.id, tag_id=tag_id))
+    db.commit()
+    return RedirectResponse(url="/?message=Todo successfully added", status_code=303)
 
-        if not tags:
-            db.add(Setting(todo_id=new_todo.id, tag_id=None))
-        else:
-            for tag_id in tags:
-                db.add(Setting(todo_id=new_todo.id, tag_id=tag_id))
-
-        db.commit()
-        return RedirectResponse(url="/?message=Todo successfully added", status_code=303)
-
-    except Exception as e:
-        print(f"Error: {e}")  # ログにエラーメッセージを表示
-        return RedirectResponse(url="/?message=Error occurred while adding Todo", status_code=303)
 
 @router.post("/delete-todo/{todo_id}")
 async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
@@ -88,16 +83,12 @@ async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
 async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
     todo = db.query(Todo).filter(Todo.id == todo_id).first()
     if todo:
-        # 型キャストでbool値を取得して反転
         todo.done = not bool(todo.done)
-
         db.commit()
     return RedirectResponse(url="/", status_code=303)
 
-
-
 @router.post("/add-tag", response_class=HTMLResponse)
-async def create_tag(request: Request, description: str = Form(...), db: Session = Depends(get_db)):
+async def create_tag(description: str = Form(...), db: Session = Depends(get_db)):
     new_tag = Tag(description=description)
     db.add(new_tag)
     db.commit()

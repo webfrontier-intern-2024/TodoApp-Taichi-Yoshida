@@ -1,4 +1,3 @@
-<!-- add_todo.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,7 +8,6 @@
 </head>
 <body>
     <h1>Add New Todo</h1>
-    <!-- add_todo.html -->
     <form action="/add-todo" method="post">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required><br>
@@ -40,5 +38,14 @@
         </div>
     </form>
 
+    <script>
+        // 送信前に選択されたチェックボックスの値を確認するためのデバッグ
+        const form = document.querySelector('form');
+        form.addEventListener('submit', function(event) {
+            const selectedTags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
+                                       .map(checkbox => checkbox.value);
+            console.log('Selected Tags:', selectedTags);
+        });
+    </script>
 </body>
 </html>
