@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>タグを追加</title>
+    <link rel="stylesheet" href="../static/add_tag.css">
+</head>
+<body>
+    <div class="container">
+        <section class="tag-list-section">
+            <h2>既存のタグ一覧</h2>
+            <ul class="tag-list">
+                {% for tag in tags %}
+                <li class="tag-item">
+                    <form action="/delete-tag/{{ tag.id }}" method="post">
+                        <span class="tag-description">{{ tag.description }}</span>
+                        <button type="submit" class="delete-button">削除</button>
+                    </form>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+
+        <section class="add-tag-section">
+            <form action="/add-tag" method="post">
+                <h1>タグを追加</h1>
+                <label for="description">タグを付けよう！</label>
+                <input type="text" id="description" name="description" required><br>
+
+                <div class="button-container">
+                    <button type="button" class="back-button" onclick="location.href='/'">戻る</button>
+                    <button type="submit" class="add-button">タグを追加</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</body>
+</html>
