@@ -1,30 +1,18 @@
-from datetime import datetime
-from sqlalchemy import Column, String, DateTime, ForeignKey
+from sqlalchemy import Column, String, DateTime, Integer, ForeignKey
 from sqlalchemy.dialects.mysql import INTEGER, BOOLEAN
-from setting import Engine, Base  # Engine の変数名を正しく指定
+from sqlalchemy.sql import null
+from setting import Engine, Base
+from datetime import datetime
 
 # Todo table definition
 class Todo(Base):
-    """
-    Todoテーブル
-
-    id       : Todo番号 (主キー)
-    title    : タイトル
-    content  : 内容
-    deadline : 期限
-    done     : 完了・未完了
-    """
     __tablename__ = 'todo'
 
-    id = Column(
-        INTEGER(unsigned=True),
-        primary_key=True,
-        autoincrement=True,
-    )
-    title = Column(String(100), nullable=False)  # タイトルを追加
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    title = Column(String(100), nullable=False)
     content = Column(String(256), nullable=False)
     deadline = Column(DateTime, nullable=False)
-    done = Column(BOOLEAN, default=False, nullable=False)
+    done = Column(BOOLEAN, default=False)
 
     def __init__(self, title: str, content: str, deadline: datetime):
         self.title = title
@@ -42,16 +30,10 @@ class Todo(Base):
 
 # Tag table definition
 class Tag(Base):
-    """
-    Tagテーブル
-
-    id         : Tag番号 (主キー)
-    description: 説明
-    """
     __tablename__ = 'tag'
 
     id = Column(
-        INTEGER(unsigned=True),
+        Integer,
         primary_key=True,
         autoincrement=True,
     )
@@ -67,24 +49,17 @@ class Tag(Base):
 
 # Setting table definition for Todo-Tag relationships
 class Setting(Base):
-    """
-    Settingテーブル (TodoとTagの多対多関係)
-
-    id       : 主キー
-    todo_id  : Todo番号 (外部キー)
-    tag_id   : Tag番号 (外部キー)
-    """
     __tablename__ = 'setting'
 
     id = Column(
-        INTEGER(unsigned=True),
+        Integer,
         primary_key=True,
         autoincrement=True,
     )
     todo_id = Column(ForeignKey('todo.id'), nullable=False)
-    tag_id = Column(ForeignKey('tag.id'), nullable=False)
+    tag_id = Column(ForeignKey('tag.id', ondelete='CASCADE'), nullable=True) 
 
-    def __init__(self, todo_id: int, tag_id: int):
+    def __init__(self, todo_id: Column[int], tag_id: int | None):
         self.todo_id = todo_id
         self.tag_id = tag_id
 
@@ -93,4 +68,4 @@ class Setting(Base):
 
 if __name__ == "__main__":
     # テーブルを作成する
-    Base.metadata.create_all(bind=Engine)  # Engine に修正
+    Base.metadata.create_all(bind=Engine)
