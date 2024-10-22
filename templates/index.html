@@ -21,22 +21,26 @@
                         <p class="todo-content">{{ setting.todo.content }}</p>
                         <p class="todo-deadline">Deadline: {{ setting.todo.deadline.strftime('%Y-%m-%d %H:%M') }}</p>
                         <div class="todo-tags">
-                            {% if setting.tag.description %}
-                                <span class="tag">{{ setting.tag.description }}</span>
+                            {% if setting.tags %}
+                                <!-- 複数タグの表示を考慮 -->
+                                {% for tag_id in setting.tags %}
+                                    <!-- タグIDに基づいてタグ情報を取得して表示 -->
+                                    <span class="tag">{{ tag_id }}</span>
+                                {% endfor %}
+                            {% else %}
+                                <span class="tag">No tags</span>
                             {% endif %}
-                            
-                            <!-- 達成状態をトグルするボタン -->
-                            <form action="/toggle-done/{{ setting.todo.id }}" method="post" style="display:inline;">
-                                <button class="completion-status {{ 'completed' if setting.todo.done else 'not-completed' }}">
-                                    {{ '達成' if setting.todo.done else '未達成' }}
-                                </button>
-                            </form>
-                            
-                            <!-- 削除ボタン -->
-                            <form action="/delete-todo/{{ setting.todo.id }}" method="post" style="display:inline;">
-                                <button class="delete-button">削除</button>
-                            </form>
                         </div>
+                        <!-- 達成状態をトグルするボタン -->
+                        <form action="/toggle-done/{{ setting.todo.id }}" method="post" style="display:inline;">
+                            <button class="completion-status {{ 'completed' if setting.todo.done else 'not-completed' }}">
+                                {{ '達成' if setting.todo.done else '未達成' }}
+                            </button>
+                        </form>
+                        <!-- 削除ボタン -->
+                        <form action="/delete-todo/{{ setting.todo.id }}" method="post" style="display:inline;">
+                            <button class="delete-button">削除</button>
+                        </form>
                     </li>
                 {% endfor %}
             </ul>

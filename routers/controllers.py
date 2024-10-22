@@ -17,21 +17,34 @@ def get_db():
     finally:
         db.close()
 
-# Todo関連のルート
+# Todo表示ペーぞのルート
 @router.get("/", response_class=HTMLResponse)
 async def read_todos(request: Request, db: Session = Depends(get_db)):
-    settings = db.query(Setting).all()
+    # Todoごとに関連する全てのSettingエントリを取得
+    todos = db.query(Todo).all()
+
+    # SettingテーブルからTodoに関連するtag_idをリスト化して取得
     todos_with_tags = [
-        {"todo": db.query(Todo).filter(Todo.id == s.todo_id).first(),
-         "tag": db.query(Tag).filter(Tag.id == s.tag_id).first()}
-        for s in settings
+        {
+            "todo": todo,
+            "tags": [setting.tag_id for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()]
+        }
+        for todo in todos
     ]
     return templates.TemplateResponse("index.html", {"request": request, "todos_with_tags": todos_with_tags})
 
+# Todo追加ページのルート
 @router.get("/add-todo", response_class=HTMLResponse)
 async def add_todo_form(request: Request, db: Session = Depends(get_db)):
     tags = db.query(Tag).all()
     return templates.TemplateResponse("add_todo.html", {"request": request, "tags": tags})
+
+# Tagページのルート
+@router.get("/add-tag", response_class=HTMLResponse)
+async def add_tag_form(request: Request, db: Session = Depends(get_db)):
+    tags = db.query(Tag).all()
+    return templates.TemplateResponse("add_tag.html", {"request": request, "tags": tags})
+
 @router.post("/add-todo", response_class=HTMLResponse)
 async def create_todo(
     request: Request,
@@ -79,11 +92,7 @@ async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
         db.commit()
     return RedirectResponse(url="/", status_code=303)
 
-# Tag関連のルート
-@router.get("/add-tag", response_class=HTMLResponse)
-async def add_tag_form(request: Request, db: Session = Depends(get_db)):
-    tags = db.query(Tag).all()
-    return templates.TemplateResponse("add_tag.html", {"request": request, "tags": tags})
+
 
 @router.post("/add-tag", response_class=HTMLResponse)
 async def create_tag(request: Request, description: str = Form(...), db: Session = Depends(get_db)):
