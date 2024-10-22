@@ -1,6 +1,6 @@
 /* Reset some default styles */
 body, h1, ul, li, a, button, p {
-    margin: 0;
+    margin: 20;
     padding: 0;
     box-sizing: border-box;
 }
@@ -10,20 +10,34 @@ body {
     background-color: #f9f9f9;
     font-family: 'Arial', sans-serif;
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: center; /* Center horizontally */
+    align-items: flex-start; /* Align items to the top */
     flex-direction: column;
-    min-height: 100vh;
+    min-height: 100vh; /* Full height of the viewport */
     padding: 20px;
+}
+
+/* Centering container for content */
+.container {
+    max-width: 600px; /* Maximum width of the content */
+    width: 100%; /* Allow it to take full width up to max */
+    margin: 0 auto; /* Center the container */
 }
 
 /* Style the main title */
 h1 {
     color: #333;
+    text-align: center; /* Center the title */
     margin-bottom: 20px;
 }
 
-/* Center the button and style it */
+/* Center the button container and style it */
+.button-container {
+    display: flex; /* Align buttons in a row */
+    justify-content: center; /* Center the buttons */
+    gap: 10px; /* Space between buttons */
+}
+
 a button {
     padding: 10px 20px;
     background-color: #007bff;
@@ -33,46 +47,91 @@ a button {
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-    margin-bottom: 20px;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 a button:hover {
     background-color: #0056b3;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 /* Style the todo list */
 ul {
     list-style: none;
-    width: 100%;
-    max-width: 600px;
+    width: 100%; /* Take full width of the container */
     padding: 0;
 }
 
 /* Add styles to individual todo items */
-li {
+.todo-item {
     background-color: #fff;
-    border-left: 5px solid #007bff; /* Add a colored border for emphasis */
+    
     padding: 15px;
     margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    transition: background-color 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-li:hover {
+.completed-item{
+    border-left: 5px solid lightgreen;
+}
+
+.not-completed-item{
+    border-left: 5px solid salmon;
+}
+
+.todo-item:hover {
     background-color: #f0f8ff; /* Light blue background on hover */
+    transform: scale(1.02); /* Subtle scale effect */
 }
 
 /* Emphasize the title */
-li strong {
-    font-size: 18px;
+.todo-title {
+    font-size: 20px; /* Make the title larger */
     color: #333;
 }
 
 /* Style the rest of the text */
-li {
+.todo-content {
     color: #555;
+}
+
+.todo-deadline {
+    font-size: 14px; /* Smaller font for deadline */
+    color: #999; /* Light gray for deadline */
+}
+
+/* Style tags to look like labels */
+.todo-tags {
+    display: flex; /* Align tags and status side by side */
+    align-items: center; /* Center vertically */
+}
+
+.tag {
+    background-color: #007bff; /* Default theme color for the tag background */
+    color: #fff; /* White text color */
+    padding: 5px 10px; /* Padding around the tag */
+    border-radius: 12px; /* Rounded edges for the tag */
+    margin-right: 10px; /* Space between tag and completion status */
+    font-size: 14px; /* Slightly smaller font for tags */
+}
+
+/* Style completion status */
+.completion-status {
+    font-weight: bold; /* Bold text for emphasis */
+    padding: 5px 10px; /* Padding around the completion status */
+    border-radius: 12px; /* Rounded edges */
+    color: #fff; /* White text color */
+}
+
+/* Color based on completion status */
+.completed {
+    background-color: #8BC34A; /* Light green for completed tasks */
+}
+
+.not-completed {
+    background-color: #F44336; /* Red for not completed tasks */
 }
 
 /* Style paragraphs for no todos */
@@ -87,11 +146,33 @@ p {
         padding: 10px;
     }
 
-    li {
-        padding: 10px;
+    .button-container {
+        flex-direction: column; /* Stack buttons vertically on smaller screens */
     }
+}
 
-    a button {
-        width: 100%;
-    }
+.delete-button {
+    background-color: red;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 12px; /* Rounded edges */
+}
+
+.completion-status {
+    background-color: lightgray;
+    color: black;
+    border: none;
+    padding: 5px 10px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.completed {
+    background-color: lightgreen;
+}
+
+.not-completed {
+    background-color: salmon;
 }

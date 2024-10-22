@@ -4,25 +4,45 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo List</title>
-    <link rel="stylesheet" href="../static/styles.css">
+    <link rel="stylesheet" href="/static/styles.css">
 </head>
 <body>
-    <h1>Todo List</h1>
-
-    <a href="/add-todo"><button>Add New Todo</button></a>
-
-    {% if todos %}
-        <ul>
-            {% for todo in todos %}
-                <li>
-                    <strong>{{ todo.title }}</strong>: {{ todo.content }} <br>
-                    Deadline: {{ todo.deadline.strftime('%Y-%m-%d %H:%M') }} <br>
-                    Completed: {{ 'Yes' if todo.done else 'No' }}
-                </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p>No todos found.</p>
-    {% endif %}
+    <main class="container">
+        <h1>Todo List</h1>
+        <div class="button-container">
+            <a href="/add-todo"><button>Todoを追加</button></a>
+            <a href="/add-tag"><button>Tagを追加</button></a>
+        </div>
+        {% if todos_with_tags %}
+            <ul>
+                {% for setting in todos_with_tags %}
+                    <li class="todo-item {{ 'completed-item' if setting.todo.done else 'not-completed-item' }}">
+                        <h2 class="todo-title">{{ setting.todo.title }}</h2>
+                        <p class="todo-content">{{ setting.todo.content }}</p>
+                        <p class="todo-deadline">Deadline: {{ setting.todo.deadline.strftime('%Y-%m-%d %H:%M') }}</p>
+                        <div class="todo-tags">
+                            {% if setting.tag.description %}
+                                <span class="tag">{{ setting.tag.description }}</span>
+                            {% endif %}
+                            
+                            <!-- 達成状態をトグルするボタン -->
+                            <form action="/toggle-done/{{ setting.todo.id }}" method="post" style="display:inline;">
+                                <button class="completion-status {{ 'completed' if setting.todo.done else 'not-completed' }}">
+                                    {{ '達成' if setting.todo.done else '未達成' }}
+                                </button>
+                            </form>
+                            
+                            <!-- 削除ボタン -->
+                            <form action="/delete-todo/{{ setting.todo.id }}" method="post" style="display:inline;">
+                                <button class="delete-button">削除</button>
+                            </form>
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>あなたのTodoはありません。</p>
+        {% endif %}
+    </main>
 </body>
 </html>
