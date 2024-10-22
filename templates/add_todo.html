@@ -1,13 +1,15 @@
+<!-- add_todo.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Todo</title>
-    <link rel="stylesheet" href="../static/add.css">
+    <link rel="stylesheet" href="../static/add_todo.css">
 </head>
 <body>
     <h1>Add New Todo</h1>
+    <!-- add_todo.html -->
     <form action="/add-todo" method="post">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required><br>
@@ -18,7 +20,25 @@
         <label for="deadline">Deadline:</label>
         <input type="datetime-local" id="deadline" name="deadline" required><br>
 
-        <button type="submit">Add Todo</button>
+        {% if tags %}
+        <label>Tags:</label>
+        <div class="todo-tags">
+            {% for tag in tags %}
+                <div class="tag-item">
+                    <input type="checkbox" id="tag_{{ tag.id }}" name="tags" value="{{ tag.id }}">
+                    <label for="tag_{{ tag.id }}">{{ tag.description }}</label>
+                </div>
+            {% endfor %}
+        </div>
+        {% else %}
+            <p>タグがありません。<br/>タグを作成するかタグを付けずにTodoを作成してください。</p>
+        {% endif %}
+
+        <div class="button-container">
+            <button type="button" onclick="location.href='/'">戻るよ〜</button>
+            <button type="submit">やる事追加するよ〜</button>
+        </div>
     </form>
+
 </body>
 </html>
