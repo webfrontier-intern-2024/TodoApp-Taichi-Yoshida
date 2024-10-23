@@ -43,7 +43,9 @@ def create_tag(db: Session, description: str):
     new_tag = Tag(description=description)
     db.add(new_tag)
     db.commit()
+    db.refresh(new_tag)
     return new_tag
+
 
 def delete_tag(db: Session, tag_id: int):
     # 関連する設定（Settings）の削除
