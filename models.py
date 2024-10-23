@@ -39,7 +39,7 @@ class User(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True, nullable=False)
-    hashed_password = Column(String, nullable=False)
+    hashed_password: Mapped[str] = mapped_column(String, nullable=False)
     is_active = Column(Boolean, default=True)
 
 if __name__ == "__main__":
