@@ -4,9 +4,11 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from setting import SessionLocal
 from models import Todo, Tag, Setting
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from . import crud,schemas
+import logging
 
+logger = logging.getLogger(__name__)
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -51,12 +53,17 @@ async def add_tag_form(request: Request, db: Session = Depends(get_db), skip: in
 ######################
 @router.post("/todo")
 async def create_todo(
-    request: schemas.TodoCreate,  # JSONリクエストボディを受け取る
+    request: schemas.TodoCreate,
     db: Session = Depends(get_db)
 ):
-    deadline_dt = request.deadline, "%Y-%m-%dT%H:%M")
-    new_todo = crud.create_todo_with_tags(db, request.title, request.content, deadline_dt, request.tags)
-    return {"success": True, "message": "Todo successfully added", "todo": new_todo}
+    try:
+        # 日付のフォーマットを確認
+        deadline_dt = request.deadline
+        new_todo = crud.create_todo_with_tags(db, request.title, request.content, deadline_dt, request.tags)
+        return {"success": True, "message": "Todo successfully added", "todo": new_todo}
+    except Exception as e:
+        logger.error(f"Error occurred while creating todo: {e}")
+        raise HTTPException(status_code=500, detail="Internal Server Error")
 
 @router.delete("/todo/{todo_id}")
 async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
