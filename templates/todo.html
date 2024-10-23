@@ -8,7 +8,7 @@
 </head>
 <body>
     <h1>Add New Todo</h1>
-    <form action="/add-todo" method="post">
+    <form id="addTodoForm">
         <label for="title">Title:</label>
         <input type="text" id="title" name="title" required><br>
 
@@ -39,12 +39,39 @@
     </form>
 
     <script>
-        // 送信前に選択されたチェックボックスの値を確認するためのデバッグ
-        const form = document.querySelector('form');
-        form.addEventListener('submit', function(event) {
+        const form = document.getElementById('addTodoForm');
+        form.addEventListener('submit', async function(event) {
+            event.preventDefault(); // フォームのデフォルト送信を無効化
+            const title = document.getElementById('title').value;
+            const content = document.getElementById('content').value;
+            const deadline = document.getElementById('deadline').value;
             const selectedTags = Array.from(document.querySelectorAll('input[name="tags"]:checked'))
                                        .map(checkbox => checkbox.value);
-            console.log('Selected Tags:', selectedTags);
+            const todoData = {
+                title: title,
+                content: content,
+                deadline: deadline,
+                tags: selectedTags
+            };
+            try {
+                const response = await fetch('/todo', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(todoData)
+                });
+
+                if (response.ok) {
+                    console.log('Todo successfully added');
+                    location.href = '/'; // 成功したらリダイレクト
+                } else {
+                    const result = await response.json();
+                    console.error('Error adding todo:', result.message);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
         });
     </script>
 </body>

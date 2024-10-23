@@ -8,8 +8,8 @@
     <script>
         async function toggleTodoDone(todoId) {
             try {
-                const response = await fetch(`/toggle-done/${todoId}`, {
-                    method: 'POST',
+                const response = await fetch(`/todo/${todoId}`, {
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' }
                 });
                 const result = await response.json();
@@ -29,7 +29,7 @@
 
         async function deleteTodoItem(todoId) {
             try {
-                const response = await fetch(`/delete-todo/${todoId}`, {
+                const response = await fetch(`/todo/${todoId}`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -52,8 +52,8 @@
     <main class="container">
         <h1>Todo List</h1>
         <div class="button-container">
-            <a href="/add-todo"><button>Todoを追加</button></a>
-            <a href="/add-tag"><button>Tagを追加</button></a>
+            <a href="/todo"><button>Todoを追加</button></a>
+            <a href="/tag"><button>Tagを追加</button></a>
         </div>
         {% if todos_with_tags %}
             <ul>

@@ -9,7 +9,7 @@
         async function addTag() {
             const description = document.getElementById('description').value;
             try {
-                const response = await fetch('/add-tag', {
+                const response = await fetch('/tag', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -18,7 +18,7 @@
                 });
                 const result = await response.json();
                 if (result.success) {
-                    console.log('Tag added successfully:', result);
+                    console.log('Tag added successfully:', result.tag);
                     location.reload();
                 } else {
                     console.error('Failed to add tag:', result.message);
@@ -28,10 +28,9 @@
             }
         }
 
-        // Function to delete a tag via API
         async function deleteTag(tagId) {
             try {
-                const response = await fetch(`/delete-tag/${tagId}`, {
+                const response = await fetch(`/tag/${tagId}`, {
                     method: 'DELETE',
                     headers: {
                         'Content-Type': 'application/json'
