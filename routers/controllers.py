@@ -1,10 +1,11 @@
-from fastapi import APIRouter, Request, Depends, Form
+from fastapi import APIRouter, Request, Depends, Form, HTTPException
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from setting import SessionLocal
 from models import Todo, Tag, Setting
 from datetime import datetime
+from . import crud
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
@@ -20,10 +21,7 @@ def get_db():
 # Todo一覧のページ
 @router.get("/", response_class=HTMLResponse)
 async def read_todos_html(request: Request, db: Session = Depends(get_db)):
-    # Todoごとに関連する全てのSettingエントリを取得
     todos = db.query(Todo).all()
-
-    # SettingテーブルからTodoに関連するtag_idを使い、Tagテーブルからdescriptionを取得してリスト化
     todos_with_tags = [
         {
             "todo": todo,
@@ -51,7 +49,6 @@ async def add_tag_form(request: Request, db: Session = Depends(get_db)):
 ######################
 ##      操作        ##
 ######################
-
 @router.post("/add-todo", response_class=HTMLResponse)
 async def create_todo(
     title: str = Form(...),
@@ -61,43 +58,32 @@ async def create_todo(
     db: Session = Depends(get_db)
 ):
     deadline_dt = datetime.strptime(deadline, "%Y-%m-%dT%H:%M")
-    new_todo = Todo(title=title, content=content, deadline=deadline_dt)
-    db.add(new_todo)
-    db.flush()
-    for tag_id in tags:
-        db.add(Setting(todo_id=new_todo.id, tag_id=tag_id))
-    db.commit()
+    crud.create_todo_with_tags(db, title, content, deadline_dt, tags)
     return RedirectResponse(url="/?message=Todo successfully added", status_code=303)
 
-
-@router.post("/delete-todo/{todo_id}")
+@router.delete("/delete-todo/{todo_id}")
 async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-    todo = db.query(Todo).filter(Todo.id == todo_id).first()
-    if todo:
-        db.query(Setting).filter(Setting.todo_id == todo.id).delete()
-        db.delete(todo)
-        db.commit()
-    return RedirectResponse(url="/", status_code=303)
+    deleted_todo = crud.delete_todo_with_settings(db, todo_id)
+    if not deleted_todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return {"success": True, "todo_id": todo_id}
 
 @router.post("/toggle-done/{todo_id}")
 async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
-    todo = db.query(Todo).filter(Todo.id == todo_id).first()
-    if todo:
-        todo.done = not bool(todo.done)
-        db.commit()
-    return RedirectResponse(url="/", status_code=303)
+    todo = crud.toggle_todo_done(db, todo_id)
+    if todo is None:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    return {"success": True, "message": "Todo status updated", "todo": todo}
+
 
 @router.post("/add-tag", response_class=HTMLResponse)
 async def create_tag(description: str = Form(...), db: Session = Depends(get_db)):
-    new_tag = Tag(description=description)
-    db.add(new_tag)
-    db.commit()
+    crud.create_tag(db, description)
     return RedirectResponse(url="/add-tag", status_code=303)
 
 @router.post("/delete-tag/{tag_id}")
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    tag_to_delete = db.query(Tag).filter(Tag.id == tag_id).first()
-    if tag_to_delete:
-        db.delete(tag_to_delete)
-        db.commit()
+    success = crud.delete_tag(db, tag_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Tag not found")
     return RedirectResponse(url="/add-tag", status_code=303)

@@ -5,6 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Todo List</title>
     <link rel="stylesheet" href="/static/styles.css">
+    <script>
+        async function toggleTodoDone(todoId) {
+            try {
+                const response = await fetch(`/toggle-done/${todoId}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                const result = await response.json();
+                console.log("Response received:", result);  // レスポンス全体を表示
+
+                // 成功確認
+                if (result.success) {
+                    location.reload(); 
+                    console.log("Todo status updated successfully.");
+                } else {
+                    console.log("Unexpected response format:", result); // 成功以外のレスポンスに対するエラーログ
+                }
+            } catch (error) {
+                console.error('Error toggling todo status:', error);
+                console.log("Error occurred while toggling todo status.");
+            }
+        }
+
+        async function deleteTodoItem(todoId) {
+            try {
+                const response = await fetch(`/delete-todo/${todoId}`, {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                // レスポンスをJSON形式で取得
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();  // 削除に成功した場合はページをリロード
+                } else {
+                    console.error('Error deleting todo:', result.message);
+                }
+            } catch (error) {
+                console.error('Error deleting todo:', error);
+            }
+        }
+
+    </script>
 </head>
 <body>
     <main class="container">
@@ -22,24 +67,16 @@
                         <p class="todo-deadline">Deadline: {{ setting.todo.deadline.strftime('%Y-%m-%d %H:%M') }}</p>
                         <div class="todo-tags">
                             {% if setting.tags %}
-                                <!-- 複数タグの表示を考慮 -->
                                 {% for tag_id in setting.tags %}
-                                    <!-- タグIDに基づいてタグ情報を取得して表示 -->
                                     <span class="tag">{{ tag_id }}</span>
                                 {% endfor %}
                             {% else %}
                             {% endif %}
                         </div>
-                        <!-- 達成状態をトグルするボタン -->
-                        <form action="/toggle-done/{{ setting.todo.id }}" method="post" style="display:inline;">
-                            <button class="completion-status {{ 'completed' if setting.todo.done else 'not-completed' }}">
-                                {{ '達成' if setting.todo.done else '未達成' }}
-                            </button>
-                        </form>
-                        <!-- 削除ボタン -->
-                        <form action="/delete-todo/{{ setting.todo.id }}" method="post" style="display:inline;">
-                            <button class="delete-button">削除</button>
-                        </form>
+                        <button onclick="toggleTodoDone('{{ setting.todo.id }}')" class="completion-status {{ 'completed' if setting.todo.done else 'not-completed' }}">
+                            {{ '達成' if setting.todo.done else '未達成' }}
+                        </button>
+                        <button onclick="deleteTodoItem('{{ setting.todo.id }}')" class="delete-button">削除</button>
                     </li>
                 {% endfor %}
             </ul>
