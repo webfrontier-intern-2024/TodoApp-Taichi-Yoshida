@@ -51,7 +51,6 @@ class Tag(Base):
 # Setting table definition for Todo-Tag relationships
 class Setting(Base):
     __tablename__ = 'setting'
-
     id = Column(
         Integer,
         primary_key=True,
@@ -60,10 +59,9 @@ class Setting(Base):
     todo_id = Column(ForeignKey('todo.id'), nullable=False)
     tag_id = Column(ForeignKey('tag.id', ondelete='CASCADE'), nullable=True) 
 
-    def __init__(self, todo_id: Column[int], tag_id:Optional[int]):
+    def __init__(self, todo_id: int, tag_id:int | None):
         self.todo_id = todo_id
         self.tag_id = tag_id
-
     def __str__(self):
         return f'Todo番号: {self.todo_id}, Tag番号: {self.tag_id}'
 
