@@ -21,4 +21,5 @@ class TagResponse(BaseModel):
 class SuccessResponse(BaseModel):
     success: bool
     message: Optional[str] = None
-
+class TagCreateRequest(BaseModel):
+    description: str
