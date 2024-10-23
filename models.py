@@ -1,9 +1,6 @@
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey
-from sqlalchemy.dialects.mysql import INTEGER, BOOLEAN
-from sqlalchemy.sql import null
+from sqlalchemy import Column, String, DateTime, Integer, ForeignKey,Boolean
 from setting import Engine, Base
-from datetime import datetime
-from typing import Optional
+from sqlalchemy.orm import Mapped, mapped_column
 
 # Todo table definition
 class Todo(Base):
@@ -13,7 +10,7 @@ class Todo(Base):
     title = Column(String(100), nullable=False)
     content = Column(String(256), nullable=False)
     deadline = Column(DateTime, nullable=False)
-    done = Column(Boolean, default=False)
+    done: Mapped[bool] = mapped_column(Boolean, default=False)
 
 # Tag table definition
 class Tag(Base):
