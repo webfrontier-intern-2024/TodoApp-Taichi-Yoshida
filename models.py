@@ -3,6 +3,7 @@ from sqlalchemy.dialects.mysql import INTEGER, BOOLEAN
 from sqlalchemy.sql import null
 from setting import Engine, Base
 from datetime import datetime
+from typing import Optional
 
 # Todo table definition
 class Todo(Base):
@@ -59,7 +60,7 @@ class Setting(Base):
     todo_id = Column(ForeignKey('todo.id'), nullable=False)
     tag_id = Column(ForeignKey('tag.id', ondelete='CASCADE'), nullable=True) 
 
-    def __init__(self, todo_id: Column[int], tag_id: int | None):
+    def __init__(self, todo_id: Column[int], tag_id:Optional[int]):
         self.todo_id = todo_id
         self.tag_id = tag_id
 
