@@ -1,13 +1,13 @@
 /* Reset some default styles */
 body, h1, ul, li, a, button, p {
-    margin: 20;
+    margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
 
 /* Set a pleasant background color and font */
 body {
-    background-color: #f9f9f9;
+    background: linear-gradient(to right, #f093fb, #f5576c);
     font-family: 'Arial', sans-serif;
     display: flex;
     justify-content: center; /* Center horizontally */
@@ -19,7 +19,7 @@ body {
 
 /* Centering container for content */
 .container {
-    max-width: 600px; /* Maximum width of the content */
+    max-width: 800px; /* Increased maximum width to fit two columns */
     width: 100%; /* Allow it to take full width up to max */
     margin: 0 auto; /* Center the container */
 }
@@ -28,7 +28,6 @@ body {
 h1 {
     color: #333;
     text-align: center; /* Center the title */
-    margin-bottom: 20px;
 }
 
 /* Center the button container and style it */
@@ -36,6 +35,7 @@ h1 {
     display: flex; /* Align buttons in a row */
     justify-content: center; /* Center the buttons */
     gap: 10px; /* Space between buttons */
+    margin: 20px;
 }
 
 a button {
@@ -60,24 +60,25 @@ ul {
     list-style: none;
     width: 100%; /* Take full width of the container */
     padding: 0;
+    display: grid; /* Use grid layout */
+    grid-template-columns: 1fr 1fr; /* Two equal columns */
+    gap: 15px; /* Space between items */
 }
 
 /* Add styles to individual todo items */
 .todo-item {
     background-color: #fff;
-    
     padding: 15px;
-    margin-bottom: 15px;
     border-radius: 8px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
-.completed-item{
+.completed-item {
     border-left: 5px solid lightgreen;
 }
 
-.not-completed-item{
+.not-completed-item {
     border-left: 5px solid salmon;
 }
 
@@ -143,6 +144,7 @@ p {
 /* Responsive adjustments */
 @media (max-width: 450px) {
     ul {
+        grid-template-columns: 1fr; /* Stack items in a single column on smaller screens */
         padding: 10px;
     }
 

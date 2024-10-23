@@ -7,7 +7,7 @@ body, h1, form, input, textarea, button, label {
 
 /* Center the content on the page */
 body {
-    background-color: #f9f9f9;
+    background: linear-gradient(to right, #f093fb, #f5576c);
     font-family: 'Arial', sans-serif;
     display: flex;
     flex-direction: column;
@@ -30,7 +30,7 @@ form {
     padding: 20px;
     width: 400px;
     border-radius: 8px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
     display: flex;
     flex-direction: column; /* Align form elements vertically */
 }

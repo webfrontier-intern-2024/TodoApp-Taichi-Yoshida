@@ -8,23 +8,25 @@
     <script>
         async function addTag() {
             const description = document.getElementById('description').value;
-            try {
-                const response = await fetch('/tag', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ description: description })
-                });
-                const result = await response.json();
-                if (result.success) {
-                    console.log('Tag added successfully:', result.tag);
-                    location.reload();
-                } else {
-                    console.error('Failed to add tag:', result.message);
+            if (description.length != 0 ){
+                try {
+                    const response = await fetch('/tag', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ description: description })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        console.log('Tag added successfully:', result.tag);
+                        location.reload();
+                    } else {
+                        console.error('Failed to add tag:', result.message);
+                    }
+                } catch (error) {
+                    console.error('Error adding tag:', error);
                 }
-            } catch (error) {
-                console.error('Error adding tag:', error);
             }
         }
 
@@ -65,8 +67,7 @@
             </ul>
         </section>
         <section class="add-tag-section">
-            <h1>タグを追加</h1>
-            <label for="description">タグを付けよう！</label>
+            <h2>タグを追加</h2>
             <input type="text" id="description" name="description" required><br>
             <div class="button-container">
                 <button type="button" class="back-button" onclick="location.href='/'">戻る</button>

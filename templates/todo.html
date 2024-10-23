@@ -7,15 +7,15 @@
     <link rel="stylesheet" href="../static/add_todo.css">
 </head>
 <body>
-    <h1>Add New Todo</h1>
+    <h1>Todo作成</h1>
     <form id="addTodoForm">
-        <label for="title">Title:</label>
+        <label for="title">タイトル:</label>
         <input type="text" id="title" name="title" required><br>
 
-        <label for="content">Content:</label>
+        <label for="content">内容:</label>
         <textarea id="content" name="content" required></textarea><br>
 
-        <label for="deadline">Deadline:</label>
+        <label for="deadline">期限:</label>
         <input type="datetime-local" id="deadline" name="deadline" required><br>
 
         {% if tags %}
