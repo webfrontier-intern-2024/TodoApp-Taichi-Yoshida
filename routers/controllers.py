@@ -1,11 +1,10 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException,Body
-from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
+from fastapi import APIRouter, Request, Depends, HTTPException
+from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from setting import SessionLocal
 from models import Todo, Tag, Setting
-from datetime import datetime, timedelta, timezone
-from . import crud,schemas
+from . import crud, schemas
 import logging
 
 logger = logging.getLogger(__name__)
@@ -20,9 +19,22 @@ def get_db():
     finally:
         db.close()
 
+# 共通CRUD操作をハンドリングする関数
+def handle_crud_operation(db, crud_func, *args, success_message="Operation successful", error_message="Operation failed"):
+    try:
+        result = crud_func(db, *args)
+        return {"success": True, "message": success_message, "result": result}
+    except Exception as e:
+        logger.error(f"{error_message}: {e}")
+        raise HTTPException(status_code=500, detail=error_message)
+
+# 共通のテンプレートデータを取得する関数
+def common_template_data(request, db):
+    return {"request": request, "tags": db.query(Tag).all()}
+
 # Todo一覧のページ
 @router.get("/", response_class=HTMLResponse)
-async def read_todos_html(request: Request, db: Session = Depends(get_db),skip: int = 0, limit: int = 100):
+async def read_todos_html(request: Request, db: Session = Depends(get_db)):
     todos = db.query(Todo).all()
     todos_with_tags = [
         {
@@ -38,58 +50,56 @@ async def read_todos_html(request: Request, db: Session = Depends(get_db),skip: 
 
 # Todo追加ページのルート
 @router.get("/todo", response_class=HTMLResponse)
-async def add_todo_form(request: Request, db: Session = Depends(get_db),skip: int = 0, limit: int = 100):
-    tags = db.query(Tag).all()
-    return templates.TemplateResponse("todo.html", {"request": request, "tags": tags})
+async def add_todo_form(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("todo.html", common_template_data(request, db))
 
 # Tagページのルート
 @router.get("/tag", response_class=HTMLResponse)
-async def add_tag_form(request: Request, db: Session = Depends(get_db), skip: int = 0, limit: int = 100):
-    tags = db.query(Tag).all()
-    return templates.TemplateResponse("tag.html", {"request": request, "tags": tags})
+async def add_tag_form(request: Request, db: Session = Depends(get_db)):
+    return templates.TemplateResponse("tag.html", common_template_data(request, db))
 
-######################
-##      操作        ##
-######################
+# Todo作成
 @router.post("/todo")
 async def create_todo(
     request: schemas.TodoCreate,
     db: Session = Depends(get_db)
 ):
-    try:
-        # 日付のフォーマットを確認
-        deadline_dt = request.deadline
-        new_todo = crud.create_todo_with_tags(db, request.title, request.content, deadline_dt, request.tags)
-        return {"success": True, "message": "Todo successfully added", "todo": new_todo}
-    except Exception as e:
-        logger.error(f"Error occurred while creating todo: {e}")
-        raise HTTPException(status_code=500, detail="Internal Server Error")
+    return handle_crud_operation(
+        db, crud.create_todo_with_tags, request.title, request.content, request.deadline, request.tags,
+        success_message="Todo successfully added"
+    )
 
+# Todo削除
 @router.delete("/todo/{todo_id}")
 async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-    deleted_todo = crud.delete_todo_with_settings(db, todo_id)
-    if not deleted_todo:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return {"success": True, "todo_id": todo_id}
+    return handle_crud_operation(
+        db, crud.delete_todo_with_settings, todo_id,
+        success_message="Todo successfully deleted",
+        error_message="Todo not found"
+    )
 
+# Todo更新
 @router.put("/todo/{todo_id}")
 async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
-    todo = crud.toggle_todo_done(db, todo_id)
-    if todo is None:
-        raise HTTPException(status_code=404, detail="Todo not found")
-    return {"success": True, "message": "Todo status updated", "todo": todo}
+    return handle_crud_operation(
+        db, crud.toggle_todo_done, todo_id,
+        success_message="Todo status updated",
+        error_message="Todo not found"
+    )
 
+# Tag作成
 @router.post("/tag")
 async def create_tag(request: schemas.TagCreateRequest, db: Session = Depends(get_db)):
-    try:
-        new_tag = crud.create_tag(db, request.description)
-        return {"success": True, "message": "Tag successfully added", "tag": new_tag}
-    except Exception as e:
-        return {"success": False, "message": str(e)}
+    return handle_crud_operation(
+        db, crud.create_tag, request.description,
+        success_message="Tag successfully added"
+    )
 
+# Tag削除
 @router.delete("/tag/{tag_id}")
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    success = crud.delete_tag(db, tag_id)
-    if not success:
-        raise HTTPException(status_code=404, detail="Tag not found")
-    return {"success": True, "message": "Tag successfully deleted"}
+    return handle_crud_operation(
+        db, crud.delete_tag, tag_id,
+        success_message="Tag successfully deleted",
+        error_message="Tag not found"
+    )
