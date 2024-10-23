@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request, Depends, Form, HTTPException
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from setting import SessionLocal
@@ -75,15 +75,15 @@ async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Todo not found")
     return {"success": True, "message": "Todo status updated", "todo": todo}
 
-
-@router.post("/add-tag", response_class=HTMLResponse)
+@router.post("/add-tag")
 async def create_tag(description: str = Form(...), db: Session = Depends(get_db)):
     crud.create_tag(db, description)
-    return RedirectResponse(url="/add-tag", status_code=303)
+    return JSONResponse({"success": True, "message": "Tag successfully added"})
 
-@router.post("/delete-tag/{tag_id}")
+@router.delete("/delete-tag/{tag_id}")
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
     success = crud.delete_tag(db, tag_id)
+    print("HIMAHIMAHIMAIMAHIMAHIMA")
     if not success:
         raise HTTPException(status_code=404, detail="Tag not found")
-    return RedirectResponse(url="/add-tag", status_code=303)
+    return {"success": True, "message": "Tag successfully deleted"}
