@@ -56,8 +56,8 @@ class Setting(Base):
         primary_key=True,
         autoincrement=True,
     )
-    todo_id = Column(ForeignKey('todo.id'), nullable=False)
-    tag_id = Column(ForeignKey('tag.id', ondelete='CASCADE'), nullable=True) 
+    todo_id = Column(Integer,ForeignKey('todo.id'), nullable=False)
+    tag_id = Column(Integer, ForeignKey('tag.id', ondelete='CASCADE'), nullable=True)
 
     def __init__(self, todo_id: int, tag_id:int | None):
         self.todo_id = todo_id
