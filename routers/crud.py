@@ -11,6 +11,7 @@ def create_todo_with_tags(db: Session, title: str, content: str, deadline, tags:
     for tag_id in tags:
         db.add(Setting(todo_id=new_todo.id, tag_id=tag_id))
     db.commit()
+    db.refresh(new_todo)
     return new_todo  # Return the new todo
 
 def delete_todo_with_settings(db: Session, todo_id: int):
