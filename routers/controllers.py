@@ -5,9 +5,7 @@ from sqlalchemy.orm import Session
 from setting import SessionLocal
 from models import Todo, Tag, Setting
 from . import crud, schemas
-import logging
 
-logger = logging.getLogger(__name__)
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -25,7 +23,6 @@ def handle_crud_operation(db, crud_func, *args, success_message="Operation succe
         result = crud_func(db, *args)
         return {"success": True, "message": success_message, "result": result}
     except Exception as e:
-        logger.error(f"{error_message}: {e}")
         raise HTTPException(status_code=500, detail=error_message)
 
 # 共通のテンプレートデータを取得する関数
