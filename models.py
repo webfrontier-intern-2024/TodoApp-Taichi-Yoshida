@@ -34,6 +34,15 @@ class Setting(Base):
     todo_id = Column(Integer,ForeignKey('todo.id'), nullable=False)
     tag_id = Column(Integer, ForeignKey('tag.id', ondelete='CASCADE'), nullable=True)
 
+class User(Base):
+    __tablename__ = 'users'
+    
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True, index=True, nullable=False)
+    hashed_password = Column(String, nullable=False)
+    is_active = Column(Boolean, default=True)
+
 if __name__ == "__main__":
     # テーブルを作成する
     Base.metadata.create_all(bind=Engine)
+

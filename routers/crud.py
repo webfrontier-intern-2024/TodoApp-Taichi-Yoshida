@@ -1,6 +1,8 @@
 from sqlalchemy.orm import Session
-from models import Todo, Tag, Setting
+from models import Todo, Tag, Setting,User
 import logging
+from passlib.context import CryptContext
+from setting import pwd_context
 
 logger = logging.getLogger(__name__)
 
@@ -61,3 +63,18 @@ def delete_tag(db: Session, tag_id: int):
     # コミットを追加
     db.commit()
     return None
+
+
+def create_user(db: Session, username: str, password: str):
+    hashed_password = pwd_context.hash(password)
+    db_user = User(username=username, hashed_password=hashed_password)
+    db.add(db_user)
+    db.commit()
+    db.refresh(db_user)
+    return db_user
+
+def get_user(db: Session, username: str):
+    return db.query(User).filter(User.username == username).first()
+
+def verify_password(plain_password: str, hashed_password: str):
+    return pwd_context.verify(plain_password, hashed_password)

@@ -23,3 +23,18 @@ class SuccessResponse(BaseModel):
     message: Optional[str] = None
 class TagCreateRequest(BaseModel):
     description: str
+
+class UserCreate(BaseModel):
+    username: str
+    password: str
+
+class UserResponse(BaseModel):
+    username: str
+    is_active: bool
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+class TokenData(BaseModel):
+    username: str | None = None
