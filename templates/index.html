@@ -12,10 +12,8 @@
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
-
                 const result = await response.json();
                 console.log("Response received:", result);  // レスポンス全体を表示
-
                 // 成功確認
                 if (result.success) {
                     location.reload(); 
@@ -48,7 +46,6 @@
                 console.error('Error deleting todo:', error);
             }
         }
-
     </script>
 </head>
 <body>
