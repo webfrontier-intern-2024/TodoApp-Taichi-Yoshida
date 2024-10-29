@@ -7,7 +7,7 @@ body, h1, form, input, textarea, button, label {
 
 /* Center the content on the page */
 body {
-    background: linear-gradient(to right, #f093fb, #f5576c);
+    background: linear-gradient(to right, #434343,#000000);
     font-family: 'Arial', sans-serif;
     display: flex;
     flex-direction: column;
@@ -19,7 +19,7 @@ body {
 
 /* Style the main title */
 h1 {
-    color: #333;
+    color: #ffffff;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -59,7 +59,7 @@ select {
 
 /* Add focus style for input fields */
 input:focus, textarea:focus, select:focus {
-    border-color: #007bff;
+    border-color: #9bc5c3;
     outline: none;
 }
 
@@ -101,7 +101,7 @@ select {
 button {
     flex: 1; /* Allow buttons to take equal width */
     padding: 12px;
-    background-color: #007bff;
+    background-color: #777777;
     color: #fff;
     font-size: 16px;
     font-weight: bold;
@@ -117,7 +117,7 @@ button:last-child {
 }
 
 button:hover {
-    background-color: #0056b3;
+    background-color: #616161;
 }
 
 /* Style the tag checkboxes and labels */
