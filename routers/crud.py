@@ -1,6 +1,21 @@
 from sqlalchemy.orm import Session
 from models import Todo, Tag, Setting
 
+def get_todos_with_tags(db: Session, skip: int = 0, limit: int = 100):
+    todos = db.query(Todo).offset(skip).limit(limit).all()
+    todos_with_tags = [
+        {
+            "todo": todo,
+            "tags": [
+                tag.description if (tag := db.query(Tag).filter(Tag.id == setting.tag_id).first()) is not None else ""
+                for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()
+            ]
+        }
+        for todo in todos
+    ]
+    print("Todos with tags constructed:", todos_with_tags)  # デバッグ用ログ
+    return todos_with_tags
+
 def create_todo_with_tags(db: Session, title: str, content: str, deadline, tags: list[int]):
     try:
         new_todo = Todo(title=title, content=content, deadline=deadline)
@@ -47,6 +62,9 @@ def toggle_todo_done(db: Session, todo_id: int):
     except Exception as e:
         db.rollback()
         raise
+
+def get_all_tags(db: Session, skip: int = 0, limit: int = 100):
+    return db.query(Tag).offset(skip).limit(limit).all()
 
 def create_tag(db: Session, description: str):
     try:
