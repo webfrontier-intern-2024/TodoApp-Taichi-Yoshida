@@ -17,14 +17,6 @@ def get_db():
     finally:
         db.close()
 
-# 共通CRUD操作をハンドリングする関数
-def handle_crud_operation(db, crud_func, *args, success_message="Operation successful", error_message="Operation failed"):
-    try:
-        result = crud_func(db, *args)
-        return {"success": True, "message": success_message, "result": result}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=error_message)
-
 # 共通のテンプレートデータを取得する関数
 def common_template_data(request, db):
     return {"request": request, "tags": db.query(Tag).all()}
@@ -33,16 +25,7 @@ def common_template_data(request, db):
 @router.get("/", response_class=HTMLResponse)
 async def read_todos_html(request: Request, db: Session = Depends(get_db)):
     todos = db.query(Todo).all()
-    todos_with_tags = [
-        {
-            "todo": todo,
-            "tags": [
-                tag.description if (tag := db.query(Tag).filter(Tag.id == setting.tag_id).first()) is not None else ""
-                for setting in db.query(Setting).filter(Setting.todo_id == todo.id).all()
-            ]
-        }
-        for todo in todos
-    ]
+    todos_with_tags = crud.get_todos_with_tags(db)
     return templates.TemplateResponse("index.html", {"request": request, "todos_with_tags": todos_with_tags})
 
 # Todo追加ページのルート
@@ -55,48 +38,62 @@ async def add_todo_form(request: Request, db: Session = Depends(get_db)):
 async def add_tag_form(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("tag.html", common_template_data(request, db))
 
+# # Todo一覧取得
+# @router.get("/todos", response_class=JSONResponse)
+# async def read_todos_json(db: Session = Depends(get_db)):
+#     todos_with_tags = crud.get_todos_with_tags(db)
+#     return {"todos": todos_with_tags}
+
 # Todo作成
 @router.post("/todo")
 async def create_todo(
     request: schemas.TodoCreate,
     db: Session = Depends(get_db)
 ):
-    return handle_crud_operation(
-        db, crud.create_todo_with_tags, request.title, request.content, request.deadline, request.tags,
-        success_message="Todo successfully added"
-    )
+    try:
+        result = crud.create_todo_with_tags(db, request.title, request.content, request.deadline, request.tags)
+        return {"success": True, "message": "Todo successfully added", "todo_id": result.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to add Todo")
 
 # Todo削除
 @router.delete("/todo/{todo_id}")
 async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
-    return handle_crud_operation(
-        db, crud.delete_todo_with_settings, todo_id,
-        success_message="Todo successfully deleted",
-        error_message="Todo not found"
-    )
+    try:
+        crud.delete_todo_with_settings(db, todo_id)  # Assuming this function does not return a value
+        return {"success": True, "message": "Todo successfully deleted", "todo_id": todo_id}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Todo not found")
 
 # Todo更新
 @router.put("/todo/{todo_id}")
 async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
-    return handle_crud_operation(
-        db, crud.toggle_todo_done, todo_id,
-        success_message="Todo status updated",
-        error_message="Todo not found"
-    )
+    try:
+        crud.toggle_todo_done(db, todo_id)  # Assuming this function does not return a value
+        return {"success": True, "message": "Todo status updated", "todo_id": todo_id}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Todo not found")
+
+# # Tag一覧取得
+# @router.get("/tags", response_class=JSONResponse)
+# async def read_tags_json(db: Session = Depends(get_db)):
+#     tags = crud.get_all_tags(db)
+#     return {"tags": [tag.description for tag in tags]}
 
 # Tag作成
 @router.post("/tag")
 async def create_tag(request: schemas.TagCreateRequest, db: Session = Depends(get_db)):
-    return handle_crud_operation(
-        db, crud.create_tag, request.description,
-        success_message="Tag successfully added"
-    )
+    try:
+        result = crud.create_tag(db, request.description)
+        return {"success": True, "message": "Tag successfully added", "tag_id": result.id}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to add Tag")
 
 # Tag削除
 @router.delete("/tag/{tag_id}")
 async def delete_tag(tag_id: int, db: Session = Depends(get_db)):
-    return handle_crud_operation(
-        db, crud.delete_tag, tag_id,
-        success_message="Tag successfully deleted",
-        error_message="Tag not found"
-    )
+    try:
+        crud.delete_tag(db, tag_id)  # Assuming this function does not return a value
+        return {"success": True, "message": "Tag successfully deleted", "tag_id": tag_id}
+    except Exception as e:
+        raise HTTPException(status_code=404, detail="Tag not found")

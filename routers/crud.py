@@ -20,9 +20,9 @@ def create_todo_with_tags(db: Session, title: str, content: str, deadline, tags:
     try:
         new_todo = Todo(title=title, content=content, deadline=deadline)
         db.add(new_todo)
-        db.flush()  # Flushを使用してIDを取得可能にする
+        db.flush()
         settings = [Setting(todo_id=new_todo.id, tag_id=tag_id) for tag_id in tags]
-        db.bulk_save_objects(settings)  # 複数の設定を一括で追加
+        db.bulk_save_objects(settings)
         db.commit()
         db.refresh(new_todo)
         return new_todo
@@ -34,7 +34,6 @@ def delete_todo_with_settings(db: Session, todo_id: int):
     try:
         todo = db.query(Todo).filter(Todo.id == todo_id).first()
         if todo:
-            # 対応するSettingも削除
             db.query(Setting).filter(Setting.todo_id == todo_id).delete()
             db.delete(todo)
             db.commit()
