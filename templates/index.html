@@ -8,7 +8,7 @@
     <script>
         async function toggleTodoDone(todoId) {
             try {
-                const response = await fetch(`/todo/${todoId}`, {
+                const response = await fetch(`/todo/done/${todoId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' }
                 });

@@ -1,5 +1,7 @@
 from sqlalchemy.orm import Session
 from models import Todo, Tag, Setting
+from datetime import datetime
+from typing import Optional
 
 def get_todos_with_tags(db: Session, skip: int = 0, limit: int = 100):
     todos = db.query(Todo).offset(skip).limit(limit).all()
@@ -62,6 +64,30 @@ def toggle_todo_done(db: Session, todo_id: int):
         db.rollback()
         raise
 
+def update_todo_with_tags(db: Session, todo_id: int, title: str, content: str, deadline: Optional[datetime], tags: list[int]):
+    try:
+        todo = db.query(Todo).filter(Todo.id == todo_id).first()
+        if todo:
+            todo.title = title
+            todo.content = content
+            todo.deadline = deadline  # datetime型として直接代入
+
+            # 既存の設定を削除
+            db.query(Setting).filter(Setting.todo_id == todo_id).delete()
+
+            # 新しい設定を追加
+            settings = [Setting(todo_id=todo_id, tag_id=tag_id) for tag_id in tags]
+            db.bulk_save_objects(settings)
+
+            db.commit()
+            db.refresh(todo)
+            return todo
+        return None
+    except Exception as e:
+        db.rollback()
+        raise
+
+
 def get_all_tags(db: Session, skip: int = 0, limit: int = 100):
     return db.query(Tag).offset(skip).limit(limit).all()
 
@@ -90,3 +116,4 @@ def delete_tag(db: Session, tag_id: int):
     except Exception as e:
         db.rollback()
         raise
+

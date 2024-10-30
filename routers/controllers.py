@@ -65,14 +65,31 @@ async def delete_todo(todo_id: int, db: Session = Depends(get_db)):
     except Exception as e:
         raise HTTPException(status_code=404, detail="Todo not found")
 
-# Todo更新
-@router.put("/todo/{todo_id}")
+# TodoDone更新
+@router.put("/todo/done/{todo_id}")
 async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
     try:
         crud.toggle_todo_done(db, todo_id)  # Assuming this function does not return a value
         return {"success": True, "message": "Todo status updated", "todo_id": todo_id}
     except Exception as e:
         raise HTTPException(status_code=404, detail="Todo not found")
+
+# Todo更新
+@router.put("/todo/{todo_id}")
+async def update_todo(
+    todo_id: int,
+    request: schemas.TodoUpdate,  # 新しいスキーマを追加する必要があります
+    db: Session = Depends(get_db)
+):
+    try:
+        # Todoの情報を更新するCRUD関数を呼び出す
+        updated_todo = crud.update_todo_with_tags(db, todo_id, request.title, request.content, request.deadline, request.tags)
+        if updated_todo:
+            return {"success": True, "message": "Todo successfully updated", "todo_id": updated_todo.id}
+        else:
+            raise HTTPException(status_code=404, detail="Todo not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update Todo")
 
 # # Tag一覧取得
 # @router.get("/tags", response_class=JSONResponse)

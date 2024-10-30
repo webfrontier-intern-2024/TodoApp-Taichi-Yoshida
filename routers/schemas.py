@@ -23,3 +23,9 @@ class SuccessResponse(BaseModel):
     message: Optional[str] = None
 class TagCreateRequest(BaseModel):
     description: str
+
+class TodoUpdate(BaseModel):
+    title: str
+    content: str
+    deadline: Optional[datetime]  # 必要に応じて変更
+    tags: List[int]

@@ -7,8 +7,8 @@ class Todo(Base):
     __tablename__ = 'todo'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    title = Column(String(100), nullable=False)
-    content = Column(String(256), nullable=False)
+    title: Mapped[str]  = mapped_column(String(100), nullable=False)
+    content: Mapped[str]  = mapped_column(String(256), nullable=False)
     deadline = Column(DateTime, nullable=False)
     done: Mapped[bool] = mapped_column(Boolean, default=False)
 
