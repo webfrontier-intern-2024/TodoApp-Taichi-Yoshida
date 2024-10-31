@@ -38,6 +38,21 @@ async def add_todo_form(request: Request, db: Session = Depends(get_db)):
 async def add_tag_form(request: Request, db: Session = Depends(get_db)):
     return templates.TemplateResponse("tag.html", common_template_data(request, db))
 
+# editページのルート
+@router.get("/todo/{todo_id}/edit", response_class=HTMLResponse)
+async def edit_todo_page(request: Request, todo_id: int, db: Session = Depends(get_db)):
+    todo = db.query(Todo).filter(Todo.id == todo_id).first()
+    if not todo:
+        raise HTTPException(status_code=404, detail="Todo not found")
+    
+    return templates.TemplateResponse("edit_todo.html", {
+        "request": request,
+        "todo_id": todo_id,
+        "title": todo.title,
+        "content": todo.content,
+        "date": todo.deadline.strftime('%Y-%m-%d')  # date format for input field
+    })
+
 # # Todo一覧取得
 # @router.get("/todos", response_class=JSONResponse)
 # async def read_todos_json(db: Session = Depends(get_db)):
@@ -78,11 +93,10 @@ async def toggle_done(todo_id: int, db: Session = Depends(get_db)):
 @router.put("/todo/{todo_id}")
 async def update_todo(
     todo_id: int,
-    request: schemas.TodoUpdate,  # 新しいスキーマを追加する必要があります
+    request: schemas.TodoUpdate,  # Ensure you have the appropriate schema defined
     db: Session = Depends(get_db)
 ):
     try:
-        # Todoの情報を更新するCRUD関数を呼び出す
         updated_todo = crud.update_todo_with_tags(db, todo_id, request.title, request.content, request.deadline, request.tags)
         if updated_todo:
             return {"success": True, "message": "Todo successfully updated", "todo_id": updated_todo.id}
@@ -90,6 +104,23 @@ async def update_todo(
             raise HTTPException(status_code=404, detail="Todo not found")
     except Exception as e:
         raise HTTPException(status_code=500, detail="Failed to update Todo")
+
+@router.put("/todo/{todo_id}")
+async def update_todo(
+    todo_id: int,
+    request: schemas.TodoUpdate,
+    db: Session = Depends(get_db)
+):
+    try:
+        updated_todo = crud.update_todo_with_tags(db, todo_id, request.title, request.content, request.deadline, request.tags)
+        if updated_todo:
+            return {"success": True, "message": "Todo successfully updated", "todo_id": updated_todo.id}
+        else:
+            raise HTTPException(status_code=404, detail="Todo not found")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail="Failed to update Todo")
+
+### tag ###
 
 # # Tag一覧取得
 # @router.get("/tags", response_class=JSONResponse)

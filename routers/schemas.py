@@ -24,8 +24,13 @@ class SuccessResponse(BaseModel):
 class TagCreateRequest(BaseModel):
     description: str
 
+class TodoUpdateRequest(BaseModel):
+    title: str
+    content: str
+    date: str
+
 class TodoUpdate(BaseModel):
     title: str
     content: str
-    deadline: Optional[datetime]  # 必要に応じて変更
-    tags: List[int]
+    deadline: datetime
+    tags: List[int] = []
